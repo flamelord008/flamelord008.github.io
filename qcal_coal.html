@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q-Cal Coal Quality Calculator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --green-dark: #1a5c2e;
+    --green-mid: #2e7d42;
+    --green-light: #d6f0dc;
+    --green-pale: #edfaf0;
+    --border: #c8e6c9;
+    --font: 'Segoe UI', Tahoma, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: #f0f4f0; color: #1a2a1a; font-size: 13px; }
+
+  header {
+    background: linear-gradient(135deg, #1a5c2e 0%, #2e7d42 60%, #1b5e20 100%);
+    color: white; padding: 16px 24px;
+    display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  header .logo {
+    width: 48px; height: 48px; background: rgba(255,255,255,0.15);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; border: 2px solid rgba(255,255,255,0.3);
+  }
+  header h1 { font-size: 17px; font-weight: 700; }
+  header p { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+
+  .main { max-width: 1400px; margin: 0 auto; padding: 16px; }
+
+  .upload-card {
+    background: white; border-radius: 10px; padding: 18px;
+    border: 2px dashed var(--green-mid); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .upload-icon { font-size: 32px; }
+  .upload-info { flex: 1; }
+  .upload-info h2 { color: var(--green-dark); font-size: 14px; margin-bottom: 3px; }
+  .upload-info p { color: #666; font-size: 11px; }
+  .file-input-wrap { position: relative; }
+  .file-input-wrap input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .btn-upload {
+    background: var(--green-mid); color: white; padding: 9px 18px;
+    border-radius: 6px; font-size: 13px; font-weight: 600; border: none;
+    cursor: pointer; white-space: nowrap;
+  }
+  .btn-upload:hover { background: var(--green-dark); }
+  #file-name { font-size: 11px; color: var(--green-dark); margin-top: 5px; font-weight: 600; }
+
+  .filter-card {
+    background: white; border-radius: 10px; padding: 14px 16px;
+    margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-group label { font-size: 10px; font-weight: 700; color: var(--green-dark); text-transform: uppercase; letter-spacing: 0.5px; }
+  .filter-group select {
+    border: 1px solid var(--border); border-radius: 5px; padding: 6px 10px;
+    font-size: 13px; min-width: 180px; outline: none;
+  }
+  .filter-group select:focus { border-color: var(--green-mid); }
+  .btn-calc {
+    background: var(--green-dark); color: white; padding: 9px 22px;
+    border-radius: 6px; font-size: 14px; font-weight: 700; border: none;
+    cursor: pointer; margin-left: auto;
+  }
+  .btn-calc:hover { background: #0a3d1a; }
+
+  /* Seam checkboxes */
+  .seam-card {
+    background: white; border-radius: 10px; padding: 14px 16px;
+    margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    display: none;
+  }
+  .seam-card-head {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .seam-card-head h3 {
+    font-size: 11px; font-weight: 700; color: var(--green-dark);
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .btn-seam-all, .btn-seam-none {
+    font-size: 11px; padding: 3px 10px; border-radius: 4px;
+    border: 1px solid var(--border); background: var(--green-pale);
+    color: var(--green-dark); cursor: pointer; font-weight: 600;
+  }
+  .btn-seam-none:hover { background: #ffe8e8; border-color: #f99; color: #b00; }
+  .seam-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seam-cb-label {
+    display: flex; align-items: center; gap: 6px;
+    background: #f5f5f5; border: 1px solid #ddd;
+    border-radius: 5px; padding: 5px 12px;
+    cursor: pointer; font-size: 12px; font-weight: 600;
+    transition: background 0.12s, border-color 0.12s;
+    user-select: none;
+  }
+  .seam-cb-label input[type=checkbox] { width: 14px; height: 14px; cursor: pointer; accent-color: var(--green-mid); }
+  .seam-cb-label:has(input:checked) {
+    background: var(--green-light); border-color: var(--green-mid); color: var(--green-dark);
+  }
+
+  /* Stats */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px; margin-bottom: 14px;
+  }
+  .stat-card {
+    background: white; border-radius: 8px; padding: 9px 12px;
+    border-left: 4px solid var(--green-mid); box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  }
+  .stat-card .lbl { font-size: 10px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.4px; }
+  .stat-card .val { font-size: 19px; font-weight: 700; color: var(--green-dark); margin-top: 1px; }
+  .stat-card .unt { font-size: 10px; color: #888; }
+
+  /* Table */
+  #result-area { display: none; }
+  .result-title {
+    background: var(--green-dark); color: white;
+    padding: 9px 16px; border-radius: 8px 8px 0 0;
+    font-size: 13px; font-weight: 700;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .result-title small { font-size: 11px; font-weight: normal; opacity: 0.8; }
+  .table-wrap { overflow-x: auto; background: white; border-radius: 0 0 8px 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  table { border-collapse: collapse; width: 100%; min-width: 700px; }
+  table th {
+    background: #fff9c4; border: 1px solid #c8c870;
+    padding: 5px 7px; text-align: center;
+    font-size: 11px; font-weight: 700; color: #333;
+    white-space: nowrap; position: sticky; top: 0; z-index: 2;
+  }
+  table td { border: 1px solid #ddd; padding: 4px 7px; font-size: 12px; white-space: nowrap; }
+  .tr { text-align: right; }
+  .tc { text-align: center; }
+
+  .row-section th {
+    background: var(--green-light); color: var(--green-dark);
+    font-size: 12px; text-align: left; padding: 6px 8px;
+    border: 1px solid var(--border);
+  }
+  .row-data { background: white; }
+  .row-data:hover { background: #f5fff5; }
+  .row-mean td { background: #dfffff; color: red; font-weight: 700; }
+  .row-mean td.col-tk { color: blue; }
+  .td-seam { font-weight: 700; text-align: center; }
+  .tk-a { background: #ffcccc !important; }
+  .tk-b { background: #99ffff !important; }
+
+  #loading { display: none; text-align: center; padding: 20px; color: var(--green-dark); font-weight: 600; }
+  sub { font-size: 9px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⛏</div>
+  <div>
+    <h1>Q-Cal Coal Quality Calculator</h1>
+    <p>ระบบคำนวณคุณภาพถ่านหิน — Weighted Mean by Thickness × Relative Density</p>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="upload-card">
+    <div class="upload-icon">📊</div>
+    <div class="upload-info">
+      <h2>อัปโหลดไฟล์ Excel (หน้างานและคุณภาพถ่าน)</h2>
+      <p>รองรับไฟล์ .xlsx — อ่าน columns: Seam Name, HHV, Sulphur, CaO(SO3 Free), Ash, Moisture, Relative density, Fix carbon, Volatile matter, Thickness, SO3</p>
+    </div>
+    <div>
+      <div class="file-input-wrap">
+        <button class="btn-upload">📂 เลือกไฟล์ Excel</button>
+        <input type="file" id="excel-file" accept=".xlsx,.xls" onchange="loadExcel(this)">
+      </div>
+      <div id="file-name">ยังไม่ได้เลือกไฟล์</div>
+    </div>
+  </div>
+
+  <div class="filter-card" id="filter-area" style="display:none">
+    <div class="filter-group">
+      <label>Sheet (ประเภทถ่าน)</label>
+      <select id="sel-sheet" onchange="onSheetChange()"></select>
+    </div>
+    <div class="filter-group">
+      <label>พิกัด / Floor</label>
+      <select id="sel-floor" onchange="onFloorChange()"></select>
+    </div>
+    <button class="btn-calc" onclick="calculate()">⚙ คำนวณ</button>
+  </div>
+
+  <div class="seam-card" id="seam-card">
+    <div class="seam-card-head">
+      <h3>เลือก Seam ที่ต้องการคำนวณ</h3>
+      <button class="btn-seam-all" onclick="setAllSeams(true)">✔ เลือกทั้งหมด</button>
+      <button class="btn-seam-none" onclick="setAllSeams(false)">✕ ยกเลิกทั้งหมด</button>
+    </div>
+    <div class="seam-grid" id="seam-grid"></div>
+  </div>
+
+  <div id="loading">⏳ กำลังคำนวณ...</div>
+
+  <div id="result-area">
+    <div class="stats-row" id="stats-row"></div>
+    <div class="result-title">
+      <span>📋 ผลการคำนวณ Q-Cal</span>
+      <small id="result-subtitle"></small>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Floor / Section</th>
+            <th>Seam Name</th>
+            <th>Gross Heat<br>kcal/kg</th>
+            <th>Sulphur<br>(ar) %</th>
+            <th>CaO free<br>SO<sub>3</sub> %</th>
+            <th>Ash<br>(ar) %</th>
+            <th>Moisture<br>(ar) %</th>
+            <th>Relative<br>Density</th>
+            <th>Fix Carbon<br>(ar) %</th>
+            <th>Volatile<br>(ar) %</th>
+            <th>Thickness<br>(m.)</th>
+            <th>SO<sub>3</sub></th>
+            <th>ASH FREE %</th>
+          </tr>
+        </thead>
+        <tbody id="result-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let allData = {};
+let sheetNames = [];
+
+function loadExcel(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (typeof XLSX === 'undefined') {
+    alert('กำลังโหลด library กรุณารอสักครู่แล้วลองใหม่');
+    return;
+  }
+  document.getElementById('file-name').textContent = '📄 ' + file.name;
+  // reset UI
+  document.getElementById('result-area').style.display = 'none';
+  document.getElementById('result-tbody').innerHTML = '';
+  document.getElementById('stats-row').innerHTML = '';
+  document.getElementById('seam-card').style.display = 'none';
+  document.getElementById('seam-grid').innerHTML = '';
+  document.getElementById('filter-area').style.display = 'none';
+
+  const reader = new FileReader();
+  reader.onerror = function() { alert('ไม่สามารถอ่านไฟล์ได้'); };
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      sheetNames = wb.SheetNames;
+      allData = {};
+      sheetNames.forEach(function(sh) {
+        var rows = XLSX.utils.sheet_to_json(wb.Sheets[sh], { header: 1, defval: null });
+        allData[sh] = parseSheet(rows);
+      });
+      document.getElementById('sel-sheet').innerHTML =
+        sheetNames.map(function(s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
+      document.getElementById('filter-area').style.display = 'flex';
+      onSheetChange();
+    } catch(err) {
+      alert('ไม่สามารถอ่านไฟล์ได้: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseSheet(rows) {
+  var data = [];
+  var currentFloor = '';
+  for (var i = 0; i < rows.length; i++) {
+    try {
+      var row = rows[i];
+      if (!row || !Array.isArray(row)) continue;
+      var hasVal = false;
+      for (var ci = 0; ci < row.length; ci++) { if (row[ci] !== null && row[ci] !== undefined) { hasVal = true; break; } }
+      if (!hasVal) continue;
+
+      var colA = row[0], colB = row[1], colC = row[2];
+      var colD = row[3], colE = row[4], colF = row[5], colG = row[6];
+      var colH = row[7], colI = row[8], colJ = row[9], colK = row[10];
+      var colL = row[11], colM = row[12];
+
+      var aStr = colA ? String(colA) : '';
+      if (aStr.includes('หน้างานถ่าน') || aStr === 'หน้างาน') continue;
+
+      var bStr = colB ? String(colB).trim() : '';
+      if (bStr === 'พิกัด/Floor') continue;
+      // floor = only Nxx or Sxx prefix (not W07, not +(137...))
+      if (bStr && /^[NS]\d/.test(bStr)) currentFloor = bStr;
+
+      var seam = colC ? String(colC).trim() : '';
+      if (!seam) continue;
+
+      var tk = parseNum(colL);
+      if (tk === null || tk <= 0) continue;
+
+      var ash = parseNum(colG);
+      var so3 = parseNum(colM);
+      var ashfree = (so3 !== null && ash !== null) ? (100 - so3) / 100 * ash : null;
+
+      data.push({
+        floor: currentFloor, seam: seam,
+        hhv: parseNum(colD), sul: parseNum(colE), cao: parseNum(colF),
+        ash: ash, moi: parseNum(colH), rd: parseNum(colI),
+        fc: parseNum(colJ), vol: parseNum(colK),
+        tk: tk, so3: so3, ashfree: ashfree
+      });
+    } catch(e) { continue; }
+  }
+  return data;
+}
+
+function parseNum(v) {
+  if (v === null || v === undefined || v === '') return null;
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
+function onSheetChange() {
+  const sh = document.getElementById('sel-sheet').value;
+  const rows = allData[sh] || [];
+  const floors = [...new Set(rows.map(r => r.floor).filter(Boolean))];
+  const selFloor = document.getElementById('sel-floor');
+  selFloor.innerHTML = '<option value="">— เลือกพิกัด —</option>' +
+    '<option value="ALL">— ทุกพิกัด —</option>' +
+    floors.map(f => `<option value="${f}">${f}</option>`).join('');
+  document.getElementById('seam-card').style.display = 'none';
+  document.getElementById('seam-grid').innerHTML = '';
+}
+
+function onFloorChange() {
+  const sh = document.getElementById('sel-sheet').value;
+  const floor = document.getElementById('sel-floor').value;
+  if (!floor) {
+    document.getElementById('seam-card').style.display = 'none';
+    document.getElementById('seam-grid').innerHTML = '';
+    return;
+  }
+  const rows = (allData[sh] || []).filter(r => floor === 'ALL' || r.floor === floor);
+  buildSeamChecks(rows);
+}
+
+function buildSeamChecks(rows) {
+  const seams = [...new Set(rows.map(r => r.seam))];
+  const grid = document.getElementById('seam-grid');
+  grid.innerHTML = seams.map(s =>
+    `<label class="seam-cb-label">
+      <input type="checkbox" checked value="${s}"> ${s}
+    </label>`
+  ).join('');
+  document.getElementById('seam-card').style.display = seams.length ? 'block' : 'none';
+}
+
+function setAllSeams(checked) {
+  document.querySelectorAll('#seam-grid input[type=checkbox]').forEach(cb => cb.checked = checked);
+}
+
+function getSelectedSeams() {
+  return new Set([...document.querySelectorAll('#seam-grid input:checked')].map(i => i.value));
+}
+
+function fmtN(v, dec=2) {
+  if (v === null || v === undefined || isNaN(v)) return '-';
+  return v.toFixed(dec);
+}
+
+function calculate() {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('result-area').style.display = 'none';
+  setTimeout(() => {
+    const sh = document.getElementById('sel-sheet').value;
+    const floorFilter = document.getElementById('sel-floor').value;
+    if (!floorFilter) {
+      document.getElementById('loading').style.display = 'none';
+      alert('กรุณาเลือกพิกัด / Floor ก่อนคำนวณ');
+      return;
+    }
+    const selSeams = getSelectedSeams();
+    let rows = (allData[sh] || []).filter(r => selSeams.has(r.seam));
+    if (floorFilter !== 'ALL') rows = rows.filter(r => r.floor === floorFilter);
+    if (!rows.length) {
+      document.getElementById('loading').style.display = 'none';
+      alert('ไม่พบข้อมูลในเงื่อนไขที่เลือก');
+      return;
+    }
+    renderTable(rows, sh, floorFilter);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('result-area').style.display = 'block';
+  }, 50);
+}
+
+function renderTable(rows, shName, floorFilter) {
+  const byFloor = {};
+  rows.forEach(r => {
+    const k = r.floor || '(ไม่ระบุ)';
+    if (!byFloor[k]) byFloor[k] = [];
+    byFloor[k].push(r);
+  });
+
+  let oFnTD=0, oXtk=0, oXmod=0, oXah=0, oXvo=0, oXsu=0, oXgcv=0;
+  let oXrd=0, oXso=0, oXca=0, oXfc=0, oXasd=0;
+  let nFloors=0, tkSumBH=0;
+  let colorToggle = 0;
+  let tbody = '';
+
+  Object.entries(byFloor).forEach(([floor, floorRows]) => {
+    tbody += `<tr class="row-section"><th colspan="13">${floor}</th></tr>`;
+    let FnTD=0, Xtk=0, Xmod=0, Xah=0, Xvo=0, Xsu=0, Xgcv=0;
+    let Xrd=0, Xso=0, Xca=0, Xfc=0, Xasd=0;
+    let prev = null;
+
+    floorRows.forEach(r => {
+
+      const rd = r.rd || 1;
+      const w = r.tk * rd;
+      FnTD += w; Xtk += r.tk;
+      if (r.moi  !== null) Xmod += r.moi  * w;
+      if (r.ash  !== null) Xah  += r.ash  * w;
+      if (r.vol  !== null) Xvo  += r.vol  * w;
+      if (r.sul  !== null) Xsu  += r.sul  * w;
+      if (r.hhv  !== null) Xgcv += r.hhv  * w;
+      if (r.fc   !== null) Xfc  += r.fc   * w;
+      if (r.so3  !== null) Xso  += r.so3  * w;
+      if (r.cao  !== null) Xca  += r.cao  * w;
+      if (r.ashfree !== null) Xasd += r.ashfree * w;
+      Xrd += rd * r.tk;
+
+      tbody += `<tr class="row-data">
+        <td>${floor}</td>
+        <td class="td-seam">${r.seam}</td>
+        <td class="tr">${fmtN(r.hhv,0)}</td>
+        <td class="tr">${fmtN(r.sul)}</td>
+        <td class="tr">${fmtN(r.cao)}</td>
+        <td class="tr">${fmtN(r.ash)}</td>
+        <td class="tr">${fmtN(r.moi)}</td>
+        <td class="tr">${fmtN(r.rd)}</td>
+        <td class="tr">${fmtN(r.fc)}</td>
+        <td class="tr">${fmtN(r.vol)}</td>
+        <td class="tr"><b>${fmtN(r.tk)}</b></td>
+        <td class="tr">${fmtN(r.so3)}</td>
+        <td class="tr">${fmtN(r.ashfree)}</td>
+      </tr>`;
+      prev = r;
+    });
+
+
+
+    oFnTD+=FnTD; oXtk+=Xtk; oXmod+=Xmod; oXah+=Xah; oXvo+=Xvo; oXsu+=Xsu;
+    oXgcv+=Xgcv; oXrd+=Xrd; oXso+=Xso; oXca+=Xca; oXfc+=Xfc; oXasd+=Xasd;
+    tkSumBH+=Xtk; nFloors++;
+  });
+
+  // Overall Mean only
+  const mn = oFnTD > 0;
+  tbody += `<tr style="background:#afafaf"><td colspan="13"></td></tr>`;
+  tbody += `<tr class="row-mean">
+    <td colspan="2" style="background:#FFFF00;text-align:center;color:#333;font-weight:700;font-size:13px">Mean (รวม)</td>
+    <td class="tr">${mn ? fmtN(oXgcv/oFnTD,0) : '-'}</td>
+    <td class="tr">${mn ? fmtN(oXsu/oFnTD) : '-'}</td>
+    <td class="tr">${mn ? fmtN(oXca/oFnTD) : '-'}</td>
+    <td class="tr">${mn ? fmtN(oXah/oFnTD) : '-'}</td>
+    <td class="tr">${mn ? fmtN(oXmod/oFnTD) : '-'}</td>
+    <td class="tr">${mn ? fmtN(oXrd/oXtk) : '-'}</td>
+    <td class="tr">${mn ? fmtN(oXfc/oFnTD) : '-'}</td>
+    <td class="tr">${mn ? fmtN(oXvo/oFnTD) : '-'}</td>
+    <td class="tr col-tk">${nFloors>0 ? fmtN(tkSumBH/nFloors) : '-'}</td>
+    <td class="tr">${mn ? fmtN(oXso/oFnTD) : '-'}</td>
+    <td class="tr">${mn ? fmtN(oXasd/oFnTD) : '-'}</td>
+  </tr>`;
+
+  document.getElementById('result-tbody').innerHTML = tbody;
+  document.getElementById('result-subtitle').textContent =
+    `${shName} | ${floorFilter === 'ALL' ? 'ทุกพิกัด' : floorFilter} | ${rows.length} rows`;
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card">
+      <div class="lbl">จำนวน Seam</div>
+      <div class="val">${rows.length}</div>
+      <div class="unt">รายการ</div>
+    </div>
+    <div class="stat-card">
+      <div class="lbl">จำนวน Floor</div>
+      <div class="val">${nFloors}</div>
+      <div class="unt">พิกัด</div>
+    </div>
+    <div class="stat-card" style="border-color:#1565c0">
+      <div class="lbl">Mean HHV</div>
+      <div class="val" style="color:#1565c0">${mn ? fmtN(oXgcv/oFnTD,0) : '-'}</div>
+      <div class="unt">kcal/kg</div>
+    </div>
+    <div class="stat-card" style="border-color:#6a1b9a">
+      <div class="lbl">Mean Sulphur</div>
+      <div class="val" style="color:#6a1b9a">${mn ? fmtN(oXsu/oFnTD) : '-'}</div>
+      <div class="unt">% (ar)</div>
+    </div>
+    <div class="stat-card" style="border-color:#b71c1c">
+      <div class="lbl">Mean Ash</div>
+      <div class="val" style="color:#b71c1c">${mn ? fmtN(oXah/oFnTD) : '-'}</div>
+      <div class="unt">% (ar)</div>
+    </div>
+	<div class="stat-card" style="border-color:#e65100">
+      <div class="lbl">Mean CaO free<br>SO<sub>3</sub> % </div>
+      <div class="val" style="color:#e65100">${mn ? fmtN(oXca/oFnTD) : '-'}</div>
+      <div class="unt">%</div>
+    </div>
+    <div class="stat-card" style="border-color:#e65100">
+      <div class="lbl">Mean Moisture</div>
+      <div class="val" style="color:#e65100">${mn ? fmtN(oXmod/oFnTD) : '-'}</div>
+      <div class="unt">%</div>
+    </div>
+    <div class="stat-card" style="border-color:#2e7d32">
+      <div class="lbl">Mean Thickness</div>
+      <div class="val" style="color:#2e7d32">${nFloors>0 ? fmtN(tkSumBH/nFloors) : '-'}</div>
+      <div class="unt">m / floor</div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
