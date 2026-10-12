@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+ <meta charset=UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Chiang Wep</title>
+  <link rel="icon" href="./Webpage/images/coal.ico">
+ <style>
+  	:root {
+			--background-color: #010142;
+			--text-color: #CCFF33;
+		}
+		
+		.dark-mode {
+     --background-color: #ebfff5;
+     --text-color: #000000;
+   }
+  body {
+	display: flex
+	justify-content: center;
+	align-items: center;
+	margin: 0px 20px; 
+     padding: 10px 10px;
+     background-color: var(--background-color);
+     color: var(--text-color);
+     transition: background-color 0.5s, color 0.5s;
+   }
+
+   header {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     padding: 0px 20px;
+     background-color: var(--background-color);
+     color: var(--text-color);
+     border-bottom: 5px solid #444;
+   }
+   .logo {
+	align-items: center;
+     font-size: 28px;
+     font-weight: bold;
+   }
+   .logo img {
+	margin-right: 10px;
+	 width: 64px;
+     height: 64px;
+	 transition: transform 0.3s ease;
+   }
+	.logo:hover img {
+            transform: rotate(20deg) scale(1.1); /* หมุนและขยายรูปเมื่อ hover */
+        }
+        .logo:hover {
+            transform: translateX(20px); /* ขยับข้อความเมื่อ hover */
+        }
+   nav ul {
+     align-items: center;
+     list-style-type: none;
+     margin: 0;
+     padding: 0;
+     display: flex;
+     gap: 20px;
+   }
+
+   nav ul li {
+     display: inline;
+   }
+
+   nav ul li a {
+     color: var(--text-color);
+     text-decoration: none;
+     font-size: 22px;
+   }
+   
+   a:link, a:visited, a:active { 
+     color: var(--text-color);
+     text-decoration: none; 
+   }
+   
+   a:hover, 
+   a:focus { 
+     color: #FF0000; 
+     text-decoration: none; 
+   }
+     .button0,
+	 .button1	{
+		margin: 0px 25px;
+        display: inline-block;
+        padding: 5px 12px;
+		font-weight: bold;
+		color: var(--text-color);
+        text-align: center;
+		background-color: #996600;
+        border: none;
+		border-radius: 25px;			
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+	   .button1 	{
+		color: #ffffff;	
+		background-color: #52a5ff;
+
+    }
+				   
+    .button0:hover,
+	.button1:hover	{
+        background-color: #6F4F28;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+		transform: translateY(-3px);
+    }	
+        .button1:hover {
+            background-color: #0056b3;
+        }
+    h2 {
+		margin: 10px 0px;
+        font-size: 32px;
+        color: #1E90FF;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }	
+	h5 {
+        margin: 0px 20px;
+		font-size: 60px;
+		font-weight: bold;
+		font-style: italic;
+        color: 	#37cb06;
+        text-shadow: 1px 10px 20px rgba(255, 155, 5, 1.2);
+		}
+		.centered {
+            text-align: center;
+        }
+  .toggle-wrapper {
+     display: inline;
+     align-items: center;
+   }
+	.toggle-wrapper img {
+     background-color: var(--background-color);
+     color: var(--text-color);
+     transition: background-color 0.5s, color 0.5s;
+	 width: 42px;
+     height: 42px;
+     margin-right: 0px;
+   }
+
+   .toggle-switch input {
+     opacity: 0;
+     width: 0;
+     height: 0;
+   }
+
+   .toggle-label {
+     font-size: 16px;
+   }
+   
+   .blinking-container {
+     display: inline;
+     align-items: center;
+     font-size: 1px;
+     font-weight: bold;
+   }
+     .blinking-text {
+     font-size: 18px;
+	 font-style: italic;
+	 color: #FF4500;
+	 animation: blink-animation 1.5s infinite;
+   }
+	.blinking-container img {
+     width: 30px;
+     height: 30px;
+     margin-right: 0px;
+   }
+   @keyframes blink-animation {
+     0% { opacity: 1; }
+     50% { opacity: 0; }
+     100% { opacity: 1; }
+   }
+ </style>
+</head>
+
+<body bgcolor="#000033" text="#AAAAAA">
+<header>
+   <div class="logo"> <img src="./Webpage/coal.png" alt="Icon"> Coal Geology  </div>
+   <nav>
+
+     <ul>
+       <li><a href="#"></a></li>
+       <li><a href="#"></a></li>
+       <li><a href="#"></a></li>
+       <li><a href="#"></a></li>
+	   <div class="toggle-wrapper">
+   <label class="toggle-switch">
+     <input type="checkbox" onclick="toggleDarkMode()">
+     <span class="button"> <img src="./Webpage/night.png" alt="Icon"> </span>
+   </label>
+ </div> 
+     </ul>
+   </nav>
+ </header>
+ <script>
+   function toggleDarkMode() {
+     document.body.classList.toggle('dark-mode');
+     const toggleLabel = document.querySelector('.toggle-label');
+   }
+ </script>
+ <br>
+	<h5> 
+	<div class="centered"> GEOLOGY PAGE </div>
+	</h5>
+<p align="right"> 
+<a href="http://mma.egat.co.th/geology/" target="_blank" rel="noopener"> กองธรณีวิทยา  </a>
+<br> <a href="http://mma.egat.co.th/" target="_blank" rel="noopener"> ฝ่ายวางแผนและบริหารเหมืองแม่เมาะ </a>
+</p>
+<hr>
+	<h2> 
+		<b> Coal Quality Calculation </b>
+	</h2>
+  <button class="button0" onclick="window.open('./Qcal68_31oct/login_101.php', '_blank','width=5000, height=5000');" color="#000099">
+    <code> Version G68, October 2025 </code>
+  </button> <div class="blinking-container">  <span class="blinking-text"> <img src="./Webpage/bell.png" alt="Icon"> Lastest Version 2025 </span> </div>
+  <p>
+  <button class="button0" onclick="window.open('./login_101.php', '_blank','width=5000, height=5000');" color="#000099">
+    <code> Version G67, October 2024 </code>
+  </button> 
+  <p>
+  <button class="button0" onclick="window.open('./Qcal66_31Oct/', '_blank','width=5000, height=5000');" color="#000099">
+    <code> Version G66, October 2023 </code>
+  </button> 
+  <p>
+  <button class="button0" onclick="window.open('./Qcal65_08Aug/', '_blank','width=1900, height=960');" color="#000099">
+    <code> Version G65, August 2022 </code>
+  </button>
+  <p>
+  <button class="button0"onclick="window.open('./Qcal64_01Jan/', '_blank','width=1900, height=960');" color="#000099">
+    <code> Version G65, December 2021 </code>
+  </button>
+  <p>
+  <button class="button0"onclick="window.open('./Qcal63_06Jun/', '_blank','width=1900, height=960');" color="#000099">
+    <code> Version G63, June 2020 </code>
+  </button>
+ <p>
+   <button class="button0"onclick="window.open('./Test_create_fieldLoG/', '_Test','width=1900, height=960');" color="#000099">
+    <code> Test_create_fieldLoG </code>
+  </button>
+ <p>
+<hr>
+	<h2>
+		<b> Coal Quality Analysis </b>
+	</h2>
+<p>
+	<div class="button1"> <a href="http://10.249.111.128/quality_report/" target="_blank" rel="noopener"> Mine Lab Analysis </a> </div>
+</p>
+<p>
+	<div class="button1"> <a href="http://10.249.99.236/mmpchm/Proximate.Analysis/" target="_blank" rel="noopener"> Power Plant Lab Analysis </a> </div>
+</p>
+<p>
+	<div class="button1"> <a href="http://10.249.99.40/chet/coal_type/Main.php" target="_blank" rel="noopener"> Coal to Power Plant </a> </div>
+</p>
+<p>
+	<div class="button1"> <a href="http://10.249.111.151/weboper/stk-sent.asp" target="_blank" rel="noopener"> Stock Coal </a> </div>
+</p>
+<p>
+	<div class="button1"> <a href="http://10.249.111.128/web_geology/qcal_coal.html" target="_blank" rel="noopener"> Coal Cal </a> </div>
+</p>
+</body>
+</html>
